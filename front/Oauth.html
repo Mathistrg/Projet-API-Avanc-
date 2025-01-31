@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oauth</title>
+</head>
+<body style="text-align: center;">
+    <h1>Connexion Oauth</h1>
+    <a href="/">Accueil</a>
+    <div id="loginDiv" style="display:none;">
+        <br>
+        <div style="display: flex; justify-content: center;">            
+            <div style="display: flex; margin-right: 15px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="" width="25px">
+                <button id="login" style="margin-left: 10px;">Se connecter avec GitHub</button>
+            </div>
+            <br>
+            <div style="display: flex;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/800px-Google_%22G%22_logo.svg.png" alt="" width="25px">
+                <button id="loginGoogle" style="margin-left: 10px;">Se connecter avec Google</button>
+            </div>
+        </div>
+        
+    
+    
+        <div>
+            <br><br><br>
+            <h2>Connexion</h2>
+            
+            <label for="email">Email : </label>
+            <input type="email" id="email">
+            <label for="password" style="margin-left: 15px;">Mot de passe : </label>
+            <input type="password" id="password">
+            <br><br>
+            <button id="loginButton">Connexion</button>
+            
+    
+            <h2 style="margin-top: 50px;">Incription</h2>
+
+            <label for="prenom" style="margin-left: 15px;">Prénom : </label>
+            <input type="text" id="prenom">
+            <label for="nom" style="margin-left: 15px;">Nom : </label>
+            <input type="text" id="nom">
+            <label for="email2" style="margin-left: 15px;">Email : </label>
+            <input type="email" id="email2">
+            <label for="password2" style="margin-left: 15px;">Mot de passe : </label>
+            <input type="password" id="password2">
+            <br><br>
+            <button id="signup">Inscription</button>
+        </div>
+    </div>
+
+    <div id="logoutDiv" style="display:none;">
+        <button id="logoutButton">Déconnexion</button>
+    </div>
+    
+
+    <script>
+
+        const token = localStorage.getItem("token");
+
+        
+        if (token === null || token == "null") {            
+            document.getElementById("loginDiv").style.display = "block";
+        } else {
+            document.getElementById("logoutDiv").style.display = "block";
+        }
+
+        const loginButton = document.getElementById("login");
+
+        loginButton.addEventListener("click", () => {
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23li3SUKApmi3fo5Dm&redirect_uri=http://localhost:3000/api/oauth/redirect`; 
+        });
+
+        const loginGoogleButton = document.getElementById("loginGoogle");
+        loginGoogleButton.addEventListener("click", () => {
+            window.location.href = `https://accounts.google.com/o/oauth2/auth?client_id=222012251046-6kjei43u9cjnblnf1ce3naru360squu4.apps.googleusercontent.com&redirect_uri=http://localhost:3000/api/oauthGoogle/redirect&response_type=code&scope=email%20profile`; 
+        });
+
+        const login = document.getElementById("loginButton");
+        login.addEventListener("click", () => {
+            const data = {
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
+            };
+
+            fetch('http://localhost:3000/allUsers', {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(users => {                
+                const emails = users.map(user => user.email);
+                if(emails.includes(email.value)){
+                    fetch("http://localhost:3000/api/auth/signin", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(datas => {
+                        if(datas.accessToken){
+                            localStorage.setItem("token", datas.accessToken);
+                            window.location.href = "/";                 
+                        } else {
+                            alert("Mot de passe incorrect")
+                        }
+                        
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la connexion:", error);
+                    });
+                } else {
+                    alert("email inconnue")
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de la recherche d'utilisateur: ", error)
+            })            
+        });
+
+        const logoutButton = document.getElementById("logoutButton")
+        logoutButton.addEventListener("click", () => {
+            fetch("http://localhost:3000/api/auth/signout", {
+                method: "POST"
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.removeItem("token");
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Erreur lors de la déconnexion:", error)
+            })
+            
+        });
+
+
+        const signUpButton = document.getElementById("signup");
+        signUpButton.addEventListener("click", () => {
+            const data = {
+                prenom: document.getElementById("prenom").value,
+                nom: document.getElementById("nom").value,
+                email: document.getElementById("email2").value,
+                password: document.getElementById("password2").value 
+            }
+
+
+            fetch('http://localhost:3000/allUsers', {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(users => {
+                const emails = users.map(user => user.email);
+                if(emails.includes(email2.value)){
+                    alert("Email déjà existantes")
+                } else {
+                    if(!document.getElementById("prenom").value && !document.getElementById("nom").value && !document.getElementById("email2").value && !document.getElementById("password2").value){
+                        alert("Veuillez renseigner tous les champs")
+                    } else {
+                        
+
+                        fetch("http://localhost:3000/api/auth/signup", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "x-access-token": "skddnjndjvvbNext1234343",
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => response.json())
+                        .then(datas => {
+                            localStorage.setItem("token", datas.accessToken);
+                            window.location.href = "/";
+                        })
+                        .catch(error => {
+                            console.error("Erreur lors de la connexion:", error);
+                        });
+                    }
+                }
+            })
+
+            
+            
+        });
+
+    </script>
+</body>
+</html>

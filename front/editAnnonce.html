@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/front/css/edit.css">
+</head>
+<body>
+    <a href="http://localhost:3000">HOME</a>
+
+    <div class="div-main">        
+        <input type="text" name="title" id="title">
+        <img src="#" alt="" id="image" width="500px">
+        <textarea id="description" placeholder="Description"></textarea>
+        <button id="editAnnonceButton">Edit</button>
+    </div>
+
+    <br><br><br><br><br>
+
+    <button id="deleteAnnonceButton">Delete</button>
+    
+
+</body>
+
+<script>
+    const annonceId = window.location.pathname.split('/').pop();
+    let currentEtag = ""
+
+    const uniqueAnnonce = fetch(`http://localhost:3000/getAnnonce/${annonceId}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "x-access-token": localStorage.getItem("token")
+        }
+    })
+    .then(response => {
+        currentEtag = response.headers.get('ETag')
+        return response.json()
+    })
+    .then(annonce => {
+        document.getElementById('title').value = annonce.title;
+        document.getElementById('description').value = annonce.description;
+        document.getElementById('image').src = '../uploads/' + annonce.image;
+    })
+    .catch(error => console.error("Erreur lors de la récupération de l'annonce : " + error));
+
+    document.getElementById('editAnnonceButton').addEventListener('click', () => {
+        const annonce = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            image: document.getElementById('image').value
+        }
+        fetch(`http://localhost:3000/updateAnnonce/${annonceId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                "x-access-token": localStorage.getItem("token"),
+                "If-Match": currentEtag
+            },
+            body: JSON.stringify(annonce)
+        })
+        .then(response => response.json())
+        .then(annonce => {            
+        })
+        .catch(error => console.error("Erreur lors de la mise à jour de l'annonce : " + error));
+    })
+
+    document.getElementById('deleteAnnonceButton').addEventListener('click', () => {
+        fetch(`http://localhost:3000/deleteAnnonce/${annonceId}`, {
+            method: 'DELETE',
+            headers: {
+                "Content-Type": "application/json",
+                "x-access-token": localStorage.getItem("token")
+            }
+        })
+        .then(response => response.json())
+        .then(annonce => {
+            window.location.href = '/';
+        })
+        .catch(error => console.error("Erreur lors de la suppression de l'annonce : " + error));
+    })  
+</script>
+</html>
