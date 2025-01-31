@@ -1,0 +1,23 @@
+.add-annonces
+{
+    display: flex;
+    flex-direction: column;
+    width: 35%; 
+    background-color: #f4f4f4;
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    position: relative;
+    left: 50%; 
+    transform: translateX(-50%);
+}
+
+.add-annonces input
+{
+    padding: 1% 0;
+}
+
+.add-annonces textarea
+{
+    padding: 0 0 10% 0
+}
