@@ -60,6 +60,7 @@ npm install express mongoose jsonwebtoken bcryptjs dotenv cors multer crypto axi
 Créez un fichier .env à la racine du projet et ajoutez les variables suivantes (les valeurs exactes vous seront communiquées séparément pour des raisons de sécurité)
 
 4. **Démarrer MongoDB** 
+
 mongod
 
 5. **Démarrer le Serveur** 
