@@ -65,4 +65,4 @@ mongod
 
 5. **Démarrer le Serveur** 
 
-Démarrer le Serveur
+npm start
